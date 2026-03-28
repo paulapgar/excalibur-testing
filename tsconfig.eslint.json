@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     "playwright.config.ts",
+    "eslint.config.ts",
     "src/**/*.ts",
     "tests/**/*.ts",
     "vite-env.d.ts"

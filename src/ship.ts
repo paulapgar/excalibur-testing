@@ -8,7 +8,6 @@ export class Ship extends Actor {
   private velocityY = 0;
   private screenWidth = 800;
   private screenHeight = 600;
-  shipSize = 40;
 
   constructor() {
     super({
@@ -52,24 +51,25 @@ export class Ship extends Actor {
       this.velocityY -= Math.sin(moveAngle) * acceleration * elapsedSeconds;
     }
 
-    // Handle bouncing off screen edges
-    const halfSize = this.shipSize / 2;
+    // Handle bouncing off screen edges using width/height
+    const halfSizeX = this.width / 2;
+    const halfSizeY = this.height / 2;
 
     // Left and right edges
-    if (this.pos.x - halfSize < 0) {
-      this.pos = vec(halfSize, this.pos.y);
+    if (this.pos.x - halfSizeX < 0) {
+      this.pos = vec(halfSizeX, this.pos.y);
       this.velocityX = Math.abs(this.velocityX);
-    } else if (this.pos.x + halfSize > this.screenWidth) {
-      this.pos = vec(this.screenWidth - halfSize, this.pos.y);
+    } else if (this.pos.x + halfSizeX > this.screenWidth) {
+      this.pos = vec(this.screenWidth - halfSizeX, this.pos.y);
       this.velocityX = -Math.abs(this.velocityX);
     }
 
     // Top and bottom edges
-    if (this.pos.y - halfSize < 0) {
-      this.pos = vec(this.pos.x, halfSize);
+    if (this.pos.y - halfSizeY < 0) {
+      this.pos = vec(this.pos.x, halfSizeY);
       this.velocityY = Math.abs(this.velocityY);
-    } else if (this.pos.y + halfSize > this.screenHeight) {
-      this.pos = vec(this.pos.x, this.screenHeight - halfSize);
+    } else if (this.pos.y + halfSizeY > this.screenHeight) {
+      this.pos = vec(this.pos.x, this.screenHeight - halfSizeY);
       this.velocityY = -Math.abs(this.velocityY);
     }
 
