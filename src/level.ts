@@ -1,11 +1,13 @@
-import { DefaultLoader, Engine, ExcaliburGraphicsContext, Scene, SceneActivationContext } from "excalibur";
-import { Player } from "./player";
+import { DefaultLoader, Engine, ExcaliburGraphicsContext, Scene, SceneActivationContext, Text, Font, Color } from "excalibur";
+import { Ship } from "./ship";
 
 export class MyLevel extends Scene {
+    private ship!: Ship;
+
     override onInitialize(engine: Engine): void {
         // Scene.onInitialize is where we recommend you perform the composition for your game
-        const player = new Player();
-        this.add(player); // Actors need to be added to a scene to be drawn
+        this.ship = new Ship();
+        this.add(this.ship); // Actors need to be added to a scene to be drawn
     }
 
     override onPreLoad(loader: DefaultLoader): void {
@@ -36,5 +38,20 @@ export class MyLevel extends Scene {
 
     override onPostDraw(ctx: ExcaliburGraphicsContext, elapsedMs: number): void {
         // Called after Excalibur draws to the screen
+        // Draw debug text in top-left corner
+        const fps = elapsedMs > 0 ? Math.round(1000 / elapsedMs) : 0;
+        const debugText = new Text({
+            text: `FPS: ${fps}`,
+            font: new Font({
+                size: 14,
+                family: 'monospace'
+            }),
+            color: Color.White
+        });
+        
+        ctx.save();
+        ctx.translate(20, 20);
+        debugText.draw(ctx, 0, 0);
+        ctx.restore();
     }
 }
