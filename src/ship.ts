@@ -12,7 +12,7 @@ export class Ship extends Actor {
 
   constructor() {
     super({
-      name: 'Ship',
+      name: "Ship",
       pos: vec(400, 300), // Center of 800x600 screen
       width: 40,
       height: 40,
@@ -28,14 +28,14 @@ export class Ship extends Actor {
     const elapsedSeconds = elapsedMs / 1000;
 
     // Handle rotation
-    if (engine.input.keyboard.isHeld('ArrowLeft')) {
-      this.rotation -= (this.rotationSpeed * elapsedSeconds) * (Math.PI / 180);
+    if (engine.input.keyboard.isHeld("ArrowLeft")) {
+      this.rotation -= this.rotationSpeed * elapsedSeconds * (Math.PI / 180);
     }
-    if (engine.input.keyboard.isHeld('ArrowRight')) {
-      this.rotation += (this.rotationSpeed * elapsedSeconds) * (Math.PI / 180);
+    if (engine.input.keyboard.isHeld("ArrowRight")) {
+      this.rotation += this.rotationSpeed * elapsedSeconds * (Math.PI / 180);
     }
     // zero gravity, ship continues moving
-    if (engine.input.keyboard.isHeld('ArrowUp')) {
+    if (engine.input.keyboard.isHeld("ArrowUp")) {
       // Calculate acceleration based on current rotation (forward thrust)
       // In Excalibur, rotation 0 points right; adjust so 0 points up
       const moveAngle = this.rotation - Math.PI / 2;
@@ -45,7 +45,7 @@ export class Ship extends Actor {
     }
 
     // Reverse thrust (backwards) when holding down arrow
-    if (engine.input.keyboard.isHeld('ArrowDown')) {
+    if (engine.input.keyboard.isHeld("ArrowDown")) {
       const moveAngle = this.rotation - Math.PI / 2;
       const acceleration = this.moveSpeed;
       this.velocityX -= Math.cos(moveAngle) * acceleration * elapsedSeconds;
@@ -54,7 +54,7 @@ export class Ship extends Actor {
 
     // Handle bouncing off screen edges
     const halfSize = this.shipSize / 2;
-    
+
     // Left and right edges
     if (this.pos.x - halfSize < 0) {
       this.pos = vec(halfSize, this.pos.y);
@@ -74,6 +74,8 @@ export class Ship extends Actor {
     }
 
     // Apply velocity (no friction in zero gravity)
-    this.pos = this.pos.add(vec(this.velocityX * elapsedSeconds, this.velocityY * elapsedSeconds));
+    this.pos = this.pos.add(
+      vec(this.velocityX * elapsedSeconds, this.velocityY * elapsedSeconds),
+    );
   }
 }
