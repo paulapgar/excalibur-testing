@@ -12,6 +12,8 @@ const game = new Engine({
   scenes: {
     start: MyLevel
   },
+  // Decouple updates from rendering: run updates at a fixed timestep (ms)
+  fixedUpdateTimestep: 16, // ~60 updates per second
   // physics: {
   //   solver: SolverStrategy.Realistic,
   //   substep: 5 // Sub step the physics simulation for more robust simulations
