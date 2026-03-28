@@ -13,35 +13,35 @@ import { Ship } from "./ship";
 export class MyLevel extends Scene {
   private ship!: Ship;
 
-  override onInitialize(engine: Engine): void {
+  override onInitialize(_engine: Engine): void {
     // Scene.onInitialize is where we recommend you perform the composition for your game
     this.ship = new Ship();
     this.add(this.ship); // Actors need to be added to a scene to be drawn
   }
 
-  override onPreLoad(loader: DefaultLoader): void {
+  override onPreLoad(_loader: DefaultLoader): void {
     // Add any scene specific resources to load
   }
 
-  override onActivate(context: SceneActivationContext<unknown>): void {
+  override onActivate(_context: SceneActivationContext<unknown>): void {
     // Called when Excalibur transitions to this scene
     // Only 1 scene is active at a time
   }
 
-  override onDeactivate(context: SceneActivationContext): void {
+  override onDeactivate(_context: SceneActivationContext): void {
     // Called when Excalibur transitions away from this scene
     // Only 1 scene is active at a time
   }
 
-  override onPreUpdate(engine: Engine, elapsedMs: number): void {
+  override onPreUpdate(_engine: Engine, _elapsedMs: number): void {
     // Called before anything updates in the scene
   }
 
-  override onPostUpdate(engine: Engine, elapsedMs: number): void {
+  override onPostUpdate(_engine: Engine, _elapsedMs: number): void {
     // Called after everything updates in the scene
   }
 
-  override onPreDraw(ctx: ExcaliburGraphicsContext, elapsedMs: number): void {
+  override onPreDraw(_ctx: ExcaliburGraphicsContext, _elapsedMs: number): void {
     // Called before Excalibur draws to the screen
   }
 

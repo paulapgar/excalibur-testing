@@ -14,11 +14,10 @@ Purpose: brief, repo-level guidance for the coding assistant. Keep edits small, 
 ## Excalibur Awareness
 - This project uses Excalibur.js; prefer consulting the official docs first: https://excaliburjs.com/docs/
 - When changing engine behavior, check `src/main.ts`, `src/resources.ts`, and scene/actor files (`src/*.ts`).
-- Common engine items to reference: `Engine` options (displayMode, fixedUpdateTimestep, backgroundColor), `Loader` / `DefaultLoader`, `Scene` lifecycle methods, and `Screen` behaviour.
 - Avoid editing compiled or distribution files in `dist/` — change source `src/` files instead.
 
 ## Excalibur Source & Issues
-- Source and issues: https://github.com/excaliburjs/Excalibur — consult the repository for implementation details or to file an issue.
+- Source and issues: https://github.com/excaliburjs/Excalibur — consult the repository for implementation details of the engine itself.
 
 ## Testing & Running
 - Use the project scripts in `package.json` (install dependencies with `npm install`); run the dev server or tests as defined there.
@@ -26,7 +25,6 @@ Purpose: brief, repo-level guidance for the coding assistant. Keep edits small, 
 
 ## Editing Guidelines for the Assistant
 - Make minimal, well-scoped changes with clear commit messages.
-- When changing visuals or engine timing (displayMode, fixedUpdateTimestep, pixelArt), explain the user-visible effect in one sentence.
 - If a change touches Excalibur integration (loader, engine options, lifecycle hooks), suggest how to verify it (which file to open, which page to refresh, or which test to run).
 - When uncertain, ask a single focused question before proceeding.
 

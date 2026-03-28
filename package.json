@@ -10,8 +10,8 @@
     "serve": "vite preview",
     "test": "npm run build && npx playwright test",
     "test:integration-update": "npx playwright test --update-snapshots",
-    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
-    "lint:fix": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\""
+    "lint": "node -r jiti ./node_modules/eslint/bin/eslint.js \"src/**/*.{ts,tsx,js,jsx}\"",
+    "lint:fix": "node -r jiti ./node_modules/eslint/bin/eslint.js --fix \"src/**/*.{ts,tsx,js,jsx}\""
   },
   "repository": {
     "type": "git",
@@ -41,6 +41,7 @@
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "jiti": "^2.6.1",
     "prettier": "^3.8.1",
     "typescript": "5.9.3",
     "vite": "6.4.1"
