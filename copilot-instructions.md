@@ -14,14 +14,14 @@ Purpose: brief, repo-level guidance for the coding assistant. Keep edits small, 
 ## Excalibur Awareness
 - This project uses Excalibur.js; prefer consulting the official docs first: https://excaliburjs.com/docs/
 - When changing engine behavior, check `src/main.ts`, `src/resources.ts`, and scene/actor files (`src/*.ts`).
+- Prefer to use methods and properties of the Excalibur built-in classes, such as Actor, when adding code to modify the behavior or state of the Actor.
 - Avoid editing compiled or distribution files in `dist/` — change source `src/` files instead.
 
-## Excalibur Source & Issues
-- Source and issues: https://github.com/excaliburjs/Excalibur — consult the repository for implementation details of the engine itself.
+## Excalibur Source
+- https://github.com/excaliburjs/Excalibur — consult the repository for implementation details of the engine itself.
 
 ## Testing & Running
-- Use the project scripts in `package.json` (install dependencies with `npm install`); run the dev server or tests as defined there.
-- Prefer to run the app locally after changes to validate behavior before committing.
+- Assume the app is already  running and rerunning after changes are saved.
 
 ## Editing Guidelines for the Assistant
 - Make minimal, well-scoped changes with clear commit messages.
