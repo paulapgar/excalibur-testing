@@ -1,16 +1,33 @@
 import { Actor, vec } from "excalibur";
 import { Resources } from "./resources";
+import { Bullet } from "./bullet";
+
+export class GunPort extends Actor {
+  constructor() {
+    super({
+      name: "GunPort",
+      pos: vec(0, -7),
+    });
+  }
+}
 
 export class Ship extends Actor {
   private rotationSpeed = 200; // degrees per second
   private moveSpeed = 100; // pixels per second
   private velocityX = 0;
   private velocityY = 0;
+  public bulletPool: Bullet[] = [];
+  private readonly bulletPoolSize = 20;
+  private gunPort!: GunPort;
+  private fireCooldown = 0; // ms remaining before next shot allowed
+  // Zone indices for background tiling
+  public zoneX: number = 0;
+  public zoneY: number = 0;
 
   constructor() {
     super({
       name: "Ship",
-      pos: vec(0, 0), // Center of 800x600 screen
+      //pos: vec(0, 0), // Center of 800x600 screen
       width: 16, // change this to match your ship image dimensions
       height: 16, // change this to match your ship image dimensions
     });
@@ -26,9 +43,20 @@ export class Ship extends Actor {
     return Math.hypot(this.velocityX, this.velocityY);
   }
 
-  override onInitialize() {
+  override onInitialize(engine: any) {
     // Use the ship image sprite
     this.graphics.use(Resources.Ship.toSprite());
+
+    // Add gun port child entity at the nose of the ship
+    this.gunPort = new GunPort();
+    this.addChild(this.gunPort);
+
+    // Create object pool of bullets, hidden and non-colliding until fired
+    for (let i = 0; i < this.bulletPoolSize; i++) {
+      const bullet = new Bullet();
+      this.bulletPool.push(bullet);
+      engine.currentScene.add(bullet);
+    }
   }
 
   override onPreUpdate(engine: any, elapsedMs: number): void {
@@ -64,6 +92,44 @@ export class Ship extends Actor {
     //   vec(this.velocityX * elapsedSeconds, this.velocityY * elapsedSeconds),
     // );
     this.vel = vec(this.velocityX, this.velocityY); // Update Excalibur's internal velocity for collision detection, etc.
+
+    // Tick down fire cooldown
+    if (this.fireCooldown > 0) {
+      this.fireCooldown -= elapsedMs;
+    }
+
+    // Fire a bullet on spacebar press (hold-friendly: fires again once cooldown expires)
+    if (engine.input.keyboard.isHeld("Space") && this.fireCooldown <= 0) {
+      this.fireCooldown = 100;
+      this.fireBullet();
+    }
+  }
+
+  private fireBullet(): void {
+    // Get the next inactive bullet from the pool
+    const bullet = this.bulletPool.find((b) => !b.graphics.visible);
+    if (!bullet) return;
+
+    // Position bullet at the gun port world position
+    bullet.pos = this.gunPort.globalPos;
+
+    // Fire in the direction the ship is pointing, adding ship's current velocity
+    const moveAngle = this.rotation - Math.PI / 2;
+    const bulletSpeed = 200;
+    bullet.vel = vec(
+      this.velocityX + Math.cos(moveAngle) * bulletSpeed,
+      this.velocityY + Math.sin(moveAngle) * bulletSpeed,
+    );
+
+    bullet.activate(this.gunPort.globalPos);
+  }
+
+  // Calculate and store which background zone the ship is in
+  public updateZone(): { x: number; y: number } {
+    // +500 before division by 1000, +400 before division by 800 per existing logic
+    this.zoneX = Math.floor((this.pos.x + 500) / 1000);
+    this.zoneY = Math.floor((this.pos.y + 400) / 800);
+    return { x: this.zoneX, y: this.zoneY };
   }
 
   override onPostUpdate(_engine: any, _elapsedMs: number): void {
