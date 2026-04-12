@@ -63,13 +63,18 @@ export class Asteroid extends Actor {
       if (event.other?.owner?.name === "Bullet") {
         // If this is a large asteroid, spawn children before hiding
         if (this.mySize === "large" && this.level) {
-          (this.level as any).spawnChildAsteroids(this.pos);
+          (this.level as any).spawnMediumAsteroids(this.pos, this.vel);
           // Hide and move away large asteroid (will be reset for reuse)
           this.graphics.isVisible = false;
           this.body.collisionType = CollisionType.PreventCollision;
           this.pos = new Vector(-10000, -10000);
-        } else if (this.mySize === "medium") {
+        } else if (this.mySize === "medium" && this.level) {
+          // If this is a medium asteroid, spawn small asteroids before destroying
+          (this.level as any).spawnSmallAsteroids(this.pos, this.vel);
           // Destroy medium asteroids completely
+          this.kill();
+        } else if (this.mySize === "small") {
+          // Destroy small asteroids completely
           this.kill();
         }
       }
@@ -96,11 +101,12 @@ export class Asteroid extends Actor {
         return Resources.AsteroidLargeBrown.toSprite();
       case "medium_brown":
         return Resources.AsteroidMediumBrown.toSprite();
+      case "small_brown":
+        return Resources.AsteroidSmallBrown.toSprite();
       case "large_gray":
       case "large_red":
       case "medium_gray":
       case "medium_red":
-      case "small_brown":
       case "small_gray":
       case "small_red":
       default:

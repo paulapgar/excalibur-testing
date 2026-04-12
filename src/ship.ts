@@ -109,7 +109,7 @@ export class Ship extends Actor {
 
     // Fire a bullet on spacebar press (hold-friendly: fires again once cooldown expires)
     if (engine.input.keyboard.isHeld("Space") && this.fireCooldown <= 0) {
-      this.fireCooldown = 100;
+      this.fireCooldown = 200;
       this.fireBullet();
     }
   }

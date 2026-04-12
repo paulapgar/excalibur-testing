@@ -8,6 +8,7 @@ export const Resources = {
   Bullet: new ImageSource("./images/bullet.png"),
   AsteroidLargeBrown: new ImageSource("./images/asteroid_large_brown.png"),
   AsteroidMediumBrown: new ImageSource("./images/asteroid_medium_brown.png"),
+  AsteroidSmallBrown: new ImageSource("./images/asteroid_small_brown.png"),
 } as const; // the 'as const' is a neat typescript trick to get strong typing on your resources.
 // So when you type Resources.Sword -> ImageSource
 

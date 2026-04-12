@@ -10,8 +10,10 @@ export class Bullet extends Actor {
   constructor() {
     super({
       name: "Bullet",
-      collisionType: CollisionType.Passive,
+      collisionType: CollisionType.PreventCollision,
     });
+    // Start bullets far off-screen to prevent accidental collisions
+    this.pos = new Vector(-10000, -10000);
   }
 
   override onInitialize() {

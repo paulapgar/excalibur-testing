@@ -10,7 +10,6 @@ import {
   vec,
   CollisionType,
   Vector,
-  Keys,
 } from "excalibur";
 import { Ship } from "./ship";
 import { BackgroundTile } from "./background-tile";
@@ -44,7 +43,7 @@ export class MyLevel extends Scene {
     // Create object pool of large asteroids, hidden and non-colliding until activated
     for (let i = 0; i < this.asteroidPoolSize; i++) {
       const asteroid = new Asteroid("large", "brown", this, this.ship);
-      asteroid.graphics.visible = false;
+      asteroid.graphics.isVisible = false;
       asteroid.body.collisionType = CollisionType.PreventCollision;
       this.asteroidPool.push(asteroid);
       engine.currentScene.add(asteroid);
@@ -58,16 +57,17 @@ export class MyLevel extends Scene {
 
   /**
    * Spawn 3 medium asteroids 10 pixels from the destroyed asteroid's center
-   * Direction is away from the center at evenly spaced angles
+   * Inherits parent velocity and modifies based on spawn angle
    */
-  public spawnChildAsteroids(position: Vector): void {
+  public spawnMediumAsteroids(position: Vector, parentVelocity: Vector): void {
     for (let i = 0; i < 3; i++) {
       // Create a new medium brown asteroid
       const mediumAsteroid = new Asteroid("medium", "brown", this, this.ship);
       this.add(mediumAsteroid);
 
-      // Even spacing around the circle for spawn angles
-      const angle = (i / 3) * Math.PI * 2;
+      // Random spacing around the circle for spawn angles
+      const angle =
+        (i / 3) * Math.PI * 2 + (Math.random() - 0.5) * (Math.PI / 3);
       const spawnDistance = 10; // pixels from center
 
       // Position 10 pixels away from center at the angle
@@ -76,12 +76,15 @@ export class MyLevel extends Scene {
       );
       mediumAsteroid.pos = spawnPos;
 
-      // Direction is the same angle (away from center)
-      const speed = Math.random() * 20 + 30; // Half speed: 30-50 pixels per second
-      const direction = new Vector(Math.cos(angle), Math.sin(angle));
+      // Start with parent's velocity (halved), then add variation based on spawn angle
+      const directionOffset = new Vector(Math.cos(angle), Math.sin(angle));
+      const speedVariation = Math.random() * 20 + 30; // 30-50 pixels per second offset
+      const variance = directionOffset.scale(speedVariation);
+      const velocity = parentVelocity.scale(0.5).add(variance);
+
       const rotationSpeed = Math.random() * 4 - 2;
 
-      mediumAsteroid.setMotion(direction.scale(speed), rotationSpeed);
+      mediumAsteroid.setMotion(velocity, rotationSpeed);
 
       // Enable collision
       mediumAsteroid.graphics.visible = true;
@@ -90,11 +93,53 @@ export class MyLevel extends Scene {
   }
 
   /**
+   * Spawn 3 small brown asteroids 10 pixels from the destroyed asteroid's center
+   * Inherits parent velocity and modifies based on spawn angle
+   */
+  public spawnSmallAsteroids(position: Vector, parentVelocity: Vector): void {
+    for (let i = 0; i < 3; i++) {
+      // Create a new small brown asteroid
+      const smallAsteroid = new Asteroid("small", "brown", this, this.ship);
+      this.add(smallAsteroid);
+
+      // Completely random spawn angle
+      const angle = Math.random() * Math.PI * 2;
+      const spawnDistance = 10; // pixels from center
+
+      // Position 10 pixels away from center at the angle
+      const spawnPos = position.add(
+        vec(Math.cos(angle) * spawnDistance, Math.sin(angle) * spawnDistance),
+      );
+      smallAsteroid.pos = spawnPos;
+
+      // Start with parent's velocity (halved), then add variation based on spawn angle
+      const directionOffset = new Vector(Math.cos(angle), Math.sin(angle));
+      const speedVariation = Math.random() * 20 + 30; // 30-50 pixels per second offset
+      const variance = directionOffset.scale(speedVariation);
+      const velocity = parentVelocity.scale(0.5).add(variance);
+
+      const rotationSpeed = Math.random() * 4 - 2;
+
+      smallAsteroid.setMotion(velocity, rotationSpeed);
+
+      // Enable collision
+      smallAsteroid.graphics.visible = true;
+      smallAsteroid.body.collisionType = CollisionType.Passive;
+    }
+  }
+
+  /**
    * Reset an asteroid to a new position and velocity
    * Places it 600 pixels from the ship at a random angle
-   * Velocity points toward a random target within 200 pixels of the ship
+   * Velocity points toward a random target within 300 pixels of the ship
+   * Respects the asteroid spawn cooldown of 100ms
    */
   public resetAsteroid(asteroid: Asteroid): void {
+    // Skip reset if spawn cooldown is active
+    if (this.asteroidSpawnCooldown > 0) {
+      return;
+    }
+
     // Random angle around the ship
     const angle = Math.random() * Math.PI * 2;
     const distance = 600;
@@ -106,7 +151,7 @@ export class MyLevel extends Scene {
     asteroid.pos = asteroidPos;
 
     // Random target within 200 pixels of ship
-    const targetOffset = 200;
+    const targetOffset = 300;
     const targetX = this.ship.pos.x + (Math.random() - 0.5) * 2 * targetOffset;
     const targetY = this.ship.pos.y + (Math.random() - 0.5) * 2 * targetOffset;
     const target = new Vector(targetX, targetY);
@@ -122,6 +167,9 @@ export class MyLevel extends Scene {
     // Make visible and enable collision
     asteroid.graphics.visible = true;
     asteroid.body.collisionType = CollisionType.Passive;
+
+    // Set spawn cooldown
+    this.asteroidSpawnCooldown = 100;
   }
 
   override onPreLoad(_loader: DefaultLoader): void {
@@ -155,6 +203,11 @@ export class MyLevel extends Scene {
         this.ship.zoneY = newY;
         this.positionBackgroundTiles(this.ship.zoneX, this.ship.zoneY);
       }
+    }
+
+    // Tick down asteroid spawn cooldown
+    if (this.asteroidSpawnCooldown > 0) {
+      this.asteroidSpawnCooldown -= _elapsedMs;
     }
 
     // Check asteroids and reset those that were shot
