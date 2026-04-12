@@ -87,6 +87,15 @@ export class Ship extends Actor {
       this.velocityY -= Math.sin(moveAngle) * acceleration * elapsedSeconds;
     }
 
+    // Clamp velocity to max speed
+    const maxSpeed = 300;
+    const speed = Math.hypot(this.velocityX, this.velocityY);
+    if (speed > maxSpeed) {
+      const scale = maxSpeed / speed;
+      this.velocityX *= scale;
+      this.velocityY *= scale;
+    }
+
     // Apply velocity (no friction in zero gravity)
     // this.pos = this.pos.add(
     //   vec(this.velocityX * elapsedSeconds, this.velocityY * elapsedSeconds),
@@ -107,7 +116,7 @@ export class Ship extends Actor {
 
   private fireBullet(): void {
     // Get the next inactive bullet from the pool
-    const bullet = this.bulletPool.find((b) => !b.graphics.visible);
+    const bullet = this.bulletPool.find((b) => !b.graphics.isVisible);
     if (!bullet) return;
 
     // Position bullet at the gun port world position

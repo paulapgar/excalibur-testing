@@ -8,13 +8,20 @@ import {
   Font,
   Color,
   vec,
+  CollisionType,
+  Vector,
+  Keys,
 } from "excalibur";
 import { Ship } from "./ship";
 import { BackgroundTile } from "./background-tile";
+import { Asteroid } from "./asteroid";
 
 export class MyLevel extends Scene {
   private ship!: Ship;
   private starFields: BackgroundTile[] = [];
+  public asteroidPool: Asteroid[] = [];
+  private readonly asteroidPoolSize = 20;
+  private asteroidSpawnCooldown = 0; // ms remaining before next asteroid can spawn
 
   override onInitialize(engine: Engine): void {
     // Scene.onInitialize is where we recommend you perform the composition for your game
@@ -33,10 +40,88 @@ export class MyLevel extends Scene {
     // Position background tiles based on the ship's current zone
     this.positionBackgroundTiles(this.ship.zoneX, this.ship.zoneY);
     this.add(this.ship); // Actors need to be added to a scene to be drawn
+
+    // Create object pool of large asteroids, hidden and non-colliding until activated
+    for (let i = 0; i < this.asteroidPoolSize; i++) {
+      const asteroid = new Asteroid("large", "brown", this, this.ship);
+      asteroid.graphics.visible = false;
+      asteroid.body.collisionType = CollisionType.PreventCollision;
+      this.asteroidPool.push(asteroid);
+      engine.currentScene.add(asteroid);
+    }
+
     // Use Excalibur's lock-to-actor camera strategy to reduce jitter
     engine.currentScene.camera.strategy.lockToActor(this.ship);
     // Default integer zoom for pixel-perfect rendering
     engine.currentScene.camera.zoom = 1;
+  }
+
+  /**
+   * Spawn 3 medium asteroids 10 pixels from the destroyed asteroid's center
+   * Direction is away from the center at evenly spaced angles
+   */
+  public spawnChildAsteroids(position: Vector): void {
+    for (let i = 0; i < 3; i++) {
+      // Create a new medium brown asteroid
+      const mediumAsteroid = new Asteroid("medium", "brown", this, this.ship);
+      this.add(mediumAsteroid);
+
+      // Even spacing around the circle for spawn angles
+      const angle = (i / 3) * Math.PI * 2;
+      const spawnDistance = 10; // pixels from center
+
+      // Position 10 pixels away from center at the angle
+      const spawnPos = position.add(
+        vec(Math.cos(angle) * spawnDistance, Math.sin(angle) * spawnDistance),
+      );
+      mediumAsteroid.pos = spawnPos;
+
+      // Direction is the same angle (away from center)
+      const speed = Math.random() * 20 + 30; // Half speed: 30-50 pixels per second
+      const direction = new Vector(Math.cos(angle), Math.sin(angle));
+      const rotationSpeed = Math.random() * 4 - 2;
+
+      mediumAsteroid.setMotion(direction.scale(speed), rotationSpeed);
+
+      // Enable collision
+      mediumAsteroid.graphics.visible = true;
+      mediumAsteroid.body.collisionType = CollisionType.Passive;
+    }
+  }
+
+  /**
+   * Reset an asteroid to a new position and velocity
+   * Places it 600 pixels from the ship at a random angle
+   * Velocity points toward a random target within 200 pixels of the ship
+   */
+  public resetAsteroid(asteroid: Asteroid): void {
+    // Random angle around the ship
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 600;
+
+    // Position asteroid 600 pixels from ship at random angle
+    const asteroidPos = this.ship.pos.add(
+      vec(Math.cos(angle) * distance, Math.sin(angle) * distance),
+    );
+    asteroid.pos = asteroidPos;
+
+    // Random target within 200 pixels of ship
+    const targetOffset = 200;
+    const targetX = this.ship.pos.x + (Math.random() - 0.5) * 2 * targetOffset;
+    const targetY = this.ship.pos.y + (Math.random() - 0.5) * 2 * targetOffset;
+    const target = new Vector(targetX, targetY);
+
+    // Calculate direction from asteroid to target
+    const direction = target.sub(asteroidPos).normalize();
+    const speed = Math.random() * 40 + 60; // Random speed between 60-100 pixels per second
+
+    // Set asteroid motion
+    const rotationSpeed = Math.random() * 4 - 2; // Random float between -2 and 2
+    asteroid.setMotion(direction.scale(speed), rotationSpeed);
+
+    // Make visible and enable collision
+    asteroid.graphics.visible = true;
+    asteroid.body.collisionType = CollisionType.Passive;
   }
 
   override onPreLoad(_loader: DefaultLoader): void {
@@ -53,9 +138,7 @@ export class MyLevel extends Scene {
     // Only 1 scene is active at a time
   }
 
-  override onPreUpdate(_engine: Engine, _elapsedMs: number): void {
-    // Called before anything updates in the scene
-  }
+  override onPreUpdate(_engine: Engine, _elapsedMs: number): void {}
 
   override onPostUpdate(_engine: Engine, _elapsedMs: number): void {
     // Called after everything updates in the scene
@@ -73,6 +156,14 @@ export class MyLevel extends Scene {
         this.positionBackgroundTiles(this.ship.zoneX, this.ship.zoneY);
       }
     }
+
+    // Check asteroids and reset those that were shot
+    for (const asteroid of this.asteroidPool) {
+      // If asteroid was shot (hidden), reset it
+      if (!asteroid.graphics.isVisible) {
+        this.resetAsteroid(asteroid);
+      }
+    }
   }
 
   override onPreDraw(_ctx: ExcaliburGraphicsContext, _elapsedMs: number): void {
@@ -83,7 +174,7 @@ export class MyLevel extends Scene {
     // Called after Excalibur draws to the screen
     // Draw debug text in top-left corner
     const fps = elapsedMs > 0 ? Math.round(1000 / elapsedMs) : 0;
-    const debugText = new Text({
+    const fpsText = new Text({
       text: `FPS: ${fps}`,
       font: new Font({
         size: 14,
@@ -137,7 +228,7 @@ export class MyLevel extends Scene {
 
     ctx.save();
     ctx.translate(20, 20);
-    debugText.draw(ctx, 0, 0);
+    fpsText.draw(ctx, 0, 0);
     shipDebugText.draw(ctx, 0, 20);
     shipPosDebugText.draw(ctx, 0, 40);
     shipPosZoneText.draw(ctx, 0, 60);

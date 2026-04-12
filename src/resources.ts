@@ -6,6 +6,8 @@ export const Resources = {
   //Sword: new ImageSource("./images/sword.png"),
   Ship: new ImageSource("./images/ship.png"), // Vite public/ directory serves the root images
   Bullet: new ImageSource("./images/bullet.png"),
+  AsteroidLargeBrown: new ImageSource("./images/asteroid_large_brown.png"),
+  AsteroidMediumBrown: new ImageSource("./images/asteroid_medium_brown.png"),
 } as const; // the 'as const' is a neat typescript trick to get strong typing on your resources.
 // So when you type Resources.Sword -> ImageSource
 
